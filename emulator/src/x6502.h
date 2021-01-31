@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-#define BIT_VALUE(b,i) ((b & (1 << i)) >> i)
-#define TOGGLE_BIT(b,i) b ^= (1 << i)
-#define SET_BIT(b,i) b |= (1 << i)
-#define CLEAR_BIT(b,i) b &= ~(1 << i)
+#define BIT_VALUE(b,i)    ((b & (1 << i)) >> i)
+#define TOGGLE_BIT(b,i)   b ^= (1 << i)
+#define SET_BIT(b,i)      b |= (1 << i)
+#define CLEAR_BIT(b,i)    b &= ~(1 << i)
 #define ASSIGN_BIT(b,i,v) if (v) SET_BIT(b,i); else CLEAR_BIT(b,i)
 
 class Bus;
@@ -54,17 +54,17 @@ private:
 	/* Addressing Modes */
 	void IMP(); // Implicit
 	void ACC(); // Accumulator
-	void IMM();	// Immediate
-	void ZP0();	// Zero Page
-	void ZPX();	// Zero Page X-Indexd
-	void ZPY();	// Zero Page Y-Indexed
-	void REL();	// Relative
-	void ABS();	// Absolute
-	void ABX();	// Absolute X-Indexed
-	void ABY();	// Absolute Y-Indexed
-	void IND();	// Indirect
-	void IZX();	// Indirect X-Indexed
-	void IZY();	// Indirect Y-Indexed
+	void IMM(); // Immediate
+	void ZP0(); // Zero Page
+	void ZPX(); // Zero Page X-Indexed
+	void ZPY(); // Zero Page Y-Indexed
+	void REL(); // Relative
+	void ABS(); // Absolute
+	void ABX(); // Absolute X-Indexed
+	void ABY(); // Absolute Y-Indexed
+	void IND(); // Indirect
+	void IZX(); // Indirect X-Indexed
+	void IZY(); // Indirect Y-Indexed
 
 	/* Instructions */
 	void ADC(); void AND(); void ASL(); void BCC(); void BCS();
