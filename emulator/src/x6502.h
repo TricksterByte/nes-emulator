@@ -49,13 +49,13 @@ private:
 
 	uint8_t  value = 0x00;   // Any currently working input value
 	uint16_t  addr = 0x0000; // Any currently working memory address
-	uint8_t cycles = 0x00;   // Remaining cycles in the current instr.
+	uint8_t cycles = 0;      // Remaining cycles in the current instr.
 
 	/* Addressing Modes */
 	void IMP(); // Implicit
 	void ACC(); // Accumulator
 	void IMM(); // Immediate
-	void ZP0(); // Zero Page
+	void ZPG(); // Zero Page
 	void ZPX(); // Zero Page X-Indexed
 	void ZPY(); // Zero Page Y-Indexed
 	void REL(); // Relative
