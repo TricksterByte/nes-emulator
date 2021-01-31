@@ -6,7 +6,7 @@
 #define TOGGLE_BIT(b,i) b ^= (1 << i)
 #define SET_BIT(b,i) b |= (1 << i)
 #define CLEAR_BIT(b,i) b &= ~(1 << i)
-#define ASSIGN_BIT(b,i,v) if (v) SET_BIT(b,i); else CLEAR_BIT(b,i);
+#define ASSIGN_BIT(b,i,v) if (v) SET_BIT(b,i); else CLEAR_BIT(b,i)
 
 class Bus;
 
