@@ -1,6 +1,9 @@
 #include "x6502.h"
 #include "Bus.h"
 
+///////////////////////////////////////
+// BASIC I/O
+
 void X6502::connectBus(Bus *b)
 {
 	bus = b;
@@ -53,28 +56,60 @@ void X6502::clock()
 		pc++; // Increment Program Counter
 
 		cycles = baseCycles[opcode]; // Get base number of cycles
+
+		switch (opcode)
+		{
+			// #include "opcodes.inc"
+		}
 	}
 
 	cycles--;
 }
 
+///////////////////////////////////////
+// ADDRESSING MODES
+
+// See:
+// http://wiki.nesdev.com/w/index.php/CPU_addressing_modes
+// for more info
+
+// Implied/Implicit
+// Desc.: Instructions that have no address operand
+//        and the destination of results is implied.
 void X6502::IMP()
 {
 	return;
 }
 
+// Accumulator
+// Desc.: Instructions that operate on the accumulator.
+//        Can be considered an implicit A.
 void X6502::ACC()
 {
 	value = a;
 	return;
 }
 
+// Immediate
+// Desc.: Instructions that expect the next byte to be
+//        used as an operand, rather than fethcing a
+//        value from memory.
 void X6502::IMM()
 {
 	addr = pc++;
 	return;
 }
 
+// 16-bit addresses address a 64kB memory range
+// The 6502 interprets addresses by page and offset:
+// the hi byte representes the page, the lo byte
+// represents the offset.
+// Effectively, there are 256 pages which address
+// a 256 byte range.
+
+// Zero Page
+// Desc.: Instructions that fetch the value from an 8-bit
+//        address on the first (zero) page
 void X6502::ZPG()
 {
 	addr =  read(pc++);
@@ -82,6 +117,11 @@ void X6502::ZPG()
 	return;
 }
 
+// Zero Page X-Indexed
+// Desc.: Fundamentally the same as ZPG, but the contents
+//        of the X register are added to the supplied address.
+//        This is useful for iterating through ranges within
+//        the first page.
 void X6502::ZPX()
 {
 	addr =  read(pc++);
@@ -90,6 +130,9 @@ void X6502::ZPX()
 	return;
 }
 
+// Zero Page Y-Indexed
+// Desc.: Fundamentally the same as ZPX, but the contents
+//        of the Y register are added instead.
 void X6502::ZPY()
 {
 	addr =  read(pc++);
@@ -98,12 +141,19 @@ void X6502::ZPY()
 	return;
 }
 
+
+// Relative
+// Desc.: Branch instructions that have a relative addressing
+//        mode specified by an 8-bit -sigmed- offset.
 void X6502::REL()
 {
 	displ = int8_t(read(pc++));
 	return;
 }
 
+// Absolute
+// Desc.: Instructions that fetch the value from a 16-bit
+//        address anywhere in memory.
 void X6502::ABS()
 {
 	addr =  read(pc++);      // lo byte
@@ -111,6 +161,11 @@ void X6502::ABS()
 	return;
 }
 
+// Absolute X-Indexed for reads
+// Desc.: Fundamentally the same as ABS for read ops,
+//        but the contents of the X register are added
+//        to the supplied address.
+// Ntes.: Adds 1 to cycles if page boundary is crossed.
 void X6502::ABXRD()
 {
 	uint16_t tmp = read(pc++);
@@ -125,6 +180,10 @@ void X6502::ABXRD()
 	return;
 }
 
+// Absolute Y-Indexed for reads
+// Desc.: Fundamentally the same as ABXRD, but the
+//        contents of the Y register are used instead.
+// Ntes.: Adds 1 to cycles if page boundary is crossed.
 void X6502::ABYRD()
 {
 	uint16_t tmp = read(pc++);
@@ -139,6 +198,11 @@ void X6502::ABYRD()
 	return;
 }
 
+// Absolute X-Indexed for writes and rmws
+// Desc.: Essentially the same as ABXRD for write
+//        and rmw ops.
+// Ntes.: Write and Read-Modify-Write ops do not
+//        increment the number of cycles. (why??)
 void X6502::ABXWR()
 {
 	uint16_t tmp = read(pc++);
@@ -152,6 +216,11 @@ void X6502::ABXWR()
 	return;
 }
 
+// Absolute Y-Indexed for writes and rmws
+// Desc.: Essentially the same as ABXWR, but the
+//        contents of the Y register are used instead.
+// Ntes.: Write and Read-Modify-Write ops do not
+//        increment the number of cycles. (why??)
 void X6502::ABYWR()
 {
 	uint16_t tmp = read(pc++);
@@ -165,19 +234,31 @@ void X6502::ABYWR()
 	return;
 }
 
+// Indirect
+// Desc.: JMP instruction has a special addressing mode
+//        where the supplied 16-bit address is read to
+//        get the actual 16-bit adddress
+// Ntes.: This instruction has a bug in the hardware, in
+//        that if the lo byte is FF, then the CPU will not
+//        increment the hi byte and read from the wrong page.
 void X6502::IND()
 {
 	uint16_t ptr = read(pc++);
 	ptr |= read(pc++);
 
 	if ((ptr & 0x00FF) == 0x00FF)
-		addr = (read(ptr & 0x00FF) << 8) | read(ptr);
+		addr = (read(ptr & 0xFF00) << 8) | read(ptr);
 	else
 		addr = (read(ptr + 1) << 8) | read(ptr);
 
 	return;
 }
 
+// Indirect X-Indexed
+// Desc.: Instructions that read from an address on the zero
+//        page, indexed by the supplied 8-bit address offset
+//        by the X register.
+// Ntes.: Doesn't discriminate between reads and writes.
 void X6502::IZX()
 {
 	uint16_t tmp = read(pc++);
@@ -189,6 +270,12 @@ void X6502::IZX()
 	return;
 }
 
+// Indirect Y-Indexed for reads
+// Desc.: Instructions where the supllied address is
+//        a location on the zero page and from where
+//        the actual 16-bit address is read and then
+//        offset by the contents in the Y register.
+// Ntes.: Adds 1 to cycles if page boundary is crossed.
 void X6502::IZYRD()
 {
 	uint16_t tmp = read(pc++);
@@ -204,6 +291,11 @@ void X6502::IZYRD()
 	return;
 }
 
+// Indirect Y-Indexed for writes and rmws
+// Desc.: Essentially the same as ABYRD for write
+//        and rmw ops.
+// Ntes.: Write and Read-Modify-Write ops do not
+//        increment the number of cycles. (why??)
 void X6502::IZYWR()
 {
 	uint16_t tmp = read(pc++);
