@@ -51,20 +51,30 @@ private:
 	uint16_t  addr = 0x0000; // Any currently working memory address
 	uint8_t cycles = 0;      // Remaining cycles in the current instr.
 
+	int8_t displ = 0x00; // 
+
 	/* Addressing Modes */
-	void IMP(); // Implicit
-	void ACC(); // Accumulator
-	void IMM(); // Immediate
-	void ZPG(); // Zero Page
-	void ZPX(); // Zero Page X-Indexed
-	void ZPY(); // Zero Page Y-Indexed
-	void REL(); // Relative
-	void ABS(); // Absolute
-	void ABX(); // Absolute X-Indexed
-	void ABY(); // Absolute Y-Indexed
-	void IND(); // Indirect
-	void IZX(); // Indirect X-Indexed
-	void IZY(); // Indirect Y-Indexed
+	void IMP();   // Implied
+	void ACC();   // Accumulator
+
+	void IMM();   // Immediate
+
+	void ZPG();   // Zero Page
+	void ZPX();   // Zero Page X-Indexed
+	void ZPY();   // Zero Page Y-Indexed
+
+	void REL();   // Relative
+
+	void ABS();   // Absolute
+	void ABXRD(); // Absolute X-Indexed for reads
+	void ABYRD(); // Absolute Y-Indexed for reads
+	void ABXWR(); // Absolute X-Indexed for writes and rmws
+	void ABYWR(); // Absolute Y-Indexed for writes and rmws
+
+	void IND();   // Indirect
+	void IZX();   // Indirect X-Indexed
+	void IZYRD(); // Indirect Y-Indexed for reads
+	void IZYWR(); // Indirect Y-Indexed for writes and rmws
 
 	/* Instructions */
 	void ADC(); void AND(); void ASL(); void BCC(); void BCS();

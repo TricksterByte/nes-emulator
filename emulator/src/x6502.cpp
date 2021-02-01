@@ -57,3 +57,163 @@ void X6502::clock()
 
 	cycles--;
 }
+
+void X6502::IMP()
+{
+	return;
+}
+
+void X6502::ACC()
+{
+	value = a;
+	return;
+}
+
+void X6502::IMM()
+{
+	addr = pc++;
+	return;
+}
+
+void X6502::ZPG()
+{
+	addr =  read(pc++);
+	addr &= 0x00FF;
+	return;
+}
+
+void X6502::ZPX()
+{
+	addr =  read(pc++);
+	addr += uint16_t(x);
+	addr &= 0x00FF;
+	return;
+}
+
+void X6502::ZPY()
+{
+	addr =  read(pc++);
+	addr += uint16_t(y);
+	addr &= 0x00FF;
+	return;
+}
+
+void X6502::REL()
+{
+	displ = int8_t(read(pc++));
+	return;
+}
+
+void X6502::ABS()
+{
+	addr =  read(pc++);      // lo byte
+	addr |= read(pc++) << 8; // hi byte
+	return;
+}
+
+void X6502::ABXRD()
+{
+	uint16_t tmp = read(pc++);
+	tmp |= read(pc++) << 8;
+
+	addr = tmp;
+	addr += uint16_t(x);
+
+	if ((addr ^ tmp) & 0x100)
+		cycles++;
+
+	return;
+}
+
+void X6502::ABYRD()
+{
+	uint16_t tmp = read(pc++);
+	tmp |= read(pc++) << 8;
+
+	addr = tmp;
+	addr += uint16_t(y);
+
+	if ((addr ^ tmp) & 0x100)
+		cycles++;
+	
+	return;
+}
+
+void X6502::ABXWR()
+{
+	uint16_t tmp = read(pc++);
+	tmp |= read(pc++) << 8;
+
+	addr = tmp;
+	addr += uint16_t(x);
+
+	addr = (addr & 0x00FF) | (tmp && 0xFF00);
+
+	return;
+}
+
+void X6502::ABYWR()
+{
+	uint16_t tmp = read(pc++);
+	tmp |= read(pc++) << 8;
+
+	addr = tmp;
+	addr += uint16_t(y);
+
+	addr = (addr & 0x00FF) | (tmp && 0xFF00);
+
+	return;
+}
+
+void X6502::IND()
+{
+	uint16_t ptr = read(pc++);
+	ptr |= read(pc++);
+
+	if ((ptr & 0x00FF) == 0x00FF)
+		addr = (read(ptr & 0x00FF) << 8) | read(ptr);
+	else
+		addr = (read(ptr + 1) << 8) | read(ptr);
+
+	return;
+}
+
+void X6502::IZX()
+{
+	uint16_t tmp = read(pc++);
+	tmp += uint16_t(x);
+
+	addr  = read(tmp & 0x00FF);
+	addr |= read((tmp + 1) & 0x00FF) << 8;
+
+	return;
+}
+
+void X6502::IZYRD()
+{
+	uint16_t tmp = read(pc++);
+	uint16_t target = read(tmp & 0x00FF);
+	target |= read((tmp + 1) & 0x00FF) << 8;
+
+	addr = target;
+	addr += uint16_t(y);
+
+	if ((addr ^ target) & 0x100)
+		cycles++;
+
+	return;
+}
+
+void X6502::IZYWR()
+{
+	uint16_t tmp = read(pc++);
+	uint16_t target = read(tmp & 0x00FF);
+	target |= read((tmp + 1) & 0x00FF) << 8;
+
+	addr = target;
+	addr += uint16_t(y);
+
+	addr = (addr & 0x00FF) | (target & 0xFF00);
+
+	return;
+}
